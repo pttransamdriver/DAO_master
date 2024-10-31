@@ -58,6 +58,7 @@ contract DAO {
         require(address(this).balance >= _amount);
 
         proposalCount++;
+        // Longhand this is written "proposalCount = proposalCount +1" to increment
 
         proposals[proposalCount] = Proposal(
             proposalCount,

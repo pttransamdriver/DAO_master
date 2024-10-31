@@ -18,7 +18,7 @@ describe('DAO', () => {
       investor5,
       recipient,
       user
-
+    
   beforeEach(async () => {
     // Set up accounts
     let accounts = await ethers.getSigners()
