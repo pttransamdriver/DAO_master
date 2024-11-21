@@ -14,7 +14,8 @@ contract DAO {
         string name;
         uint256 amount;
         address payable recipient;
-        uint256 votes;
+        uint256 upvotes;
+        uint256 downvotes;
         bool finalized;
     }
 
@@ -66,6 +67,7 @@ contract DAO {
             _amount,
             _recipient,
             0,
+            0,
             false
         );
 
@@ -78,7 +80,7 @@ contract DAO {
     }
 
     // Vote on proposal
-    function vote(uint256 _id) external onlyInvestor {
+    function vote(uint256 _id, bool isUpvote) external onlyInvestor {
         // Fetch proposal from mapping by id
         Proposal storage proposal = proposals[_id];
 
@@ -86,13 +88,23 @@ contract DAO {
         require(!votes[msg.sender][_id], "already voted");
 
         // update votes
-        proposal.votes += token.balanceOf(msg.sender);
+        uint256 voterBalance = token.balanceOf(msg.sender);
+
+        // Counts up and down votes
+        if (isUpvote) {
+            proposal.upvotes += voterBalance;
+        } else {
+            proposal.downvotes += voterBalance;
+        }
 
         // Track that user has voted
         votes[msg.sender][_id] = true;
 
         // Emit an event
         emit Vote(_id, msg.sender);
+    }
+    function hasVoted(address _voter, uint256 _proposalId) external view returns (bool){
+        return votes[_voter][_proposalId];
     }
 
     // Finalize proposal & tranfer funds
@@ -101,13 +113,14 @@ contract DAO {
         Proposal storage proposal = proposals[_id];
 
         // Ensure proposal is not already finalized
-        require(proposal.finalized == false, "proposal already finalized");
+        require(!proposal.finalized, "proposal already finalized");
 
         // Mark proposal as finalized
         proposal.finalized = true;
 
         // Check that proposal has enough votes
-        require(proposal.votes >= quorum, "must reach quorum to finalize proposal");
+        uint256 totalVotes = proposal.upvotes + proposal.downvotes;
+        require(totalVotes >= quorum, "must reach quorum to finalize proposal");
 
         // Check that the contract has enough ether
         require(address(this).balance >= proposal.amount);

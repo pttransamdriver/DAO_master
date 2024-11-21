@@ -3,11 +3,11 @@ import Button from 'react-bootstrap/Button';
 import { ethers } from 'ethers'
 
 const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
-  const voteHandler = async (id) => {
+  const voteHandler = async (id, isUpvote) => {
     try {
-      const signer = await provider.getSigner()
-      const transaction = await dao.connect(signer).vote(id)
-      await transaction.wait()
+      const signer = await provider.getSigner();
+      const transaction = await dao.connect(signer).vote(id, isUpvote);
+      await transaction.wait();
     } catch {
       window.alert('User rejected or transaction reverted')
     }
@@ -62,14 +62,23 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
               )}
             </td>
             <td>
-              {!proposal.finalized && proposal.votes > quorum && (
+              {!proposal.finalized && (
+                <>
                 <Button
-                  variant="primary"
-                  style={{ width: '100%' }}
+                  variant="success"
+                  style={{ width: '48%', marginRight: '4%' }}
                   onClick={() => finalizeHandler(proposal.id)}
                 >
-                  Finalize
+                  Upvote
                 </Button>
+                <Button 
+                variant="danger"
+                style={{ width: '48%' }}
+                onClick={() => voteHandler(proposal.id, false)}
+                >
+                Downvote
+                </Button>
+                </>
               )}
             </td>
           </tr>

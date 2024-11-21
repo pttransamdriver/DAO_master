@@ -85,7 +85,7 @@ function App() {
           />
 
           <hr/>
-
+          <p classname='text-center'><strong>Quorum</strong> {quorum} </p>
           <p className='text-center'><strong>Treasury Balance:</strong> {treasuryBalance} ETH</p>
 
           <hr/>
